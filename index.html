@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pizzeria</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Pizzeria</h1>
+    <input type="text" id="searchInput" placeholder="Cerca...">
+    <table id="menuTable">
+        <!-- La tabella verrà popolata con i dati dal CSV -->
+    </table>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            loadTable();
+
+            document.getElementById('searchInput').addEventListener('input', function () {
+                var searchTerm = this.value.toLowerCase();
+                filterTable(searchTerm);
+            });
+        });
+
+        function loadTable() {
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        var csvData = xhr.responseText;
+                        renderTable(csvData);
+                    } else {
+                        console.error('Si è verificato un errore durante il caricamento della tabella.');
+                    }
+                }
+            };
+            xhr.open('GET', 'Foglio1.csv', true);
+            xhr.send();
+        }
+
+        function renderTable(csvData) {
+            var lines = csvData.split('\n');
+            var headers = lines[0].split(',').map(header => header.trim());
+            var tableHtml = '<thead><tr>';
+            headers.forEach(function(header) {
+                tableHtml += '<th>' + header + '</th>';
+            });
+            tableHtml += '</tr></thead><tbody>';
+            for (var i = 1; i < lines.length; i++) {
+                var row = lines[i].split(',');
+                if (row.length !== headers.length) continue; // Salta le righe con colonne incomplete
+                tableHtml += '<tr>';
+                row.forEach(function(cell) {
+                    tableHtml += '<td>' + cell.trim() + '</td>';
+                });
+                tableHtml += '</tr>';
+            }
+            tableHtml += '</tbody>';
+            document.getElementById('menuTable').innerHTML = tableHtml;
+        }
+
+        function filterTable(searchTerm) {
+            var table, rows, cells, cell, i, j, shouldDisplay;
+            table = document.getElementById('menuTable');
+            rows = table.getElementsByTagName('tr');
+
+            for (i = 1; i < rows.length; i++) { // Salta l'intestazione
+                rows[i].style.display = 'none'; // Nascondi inizialmente tutte le righe
+                cells = rows[i].getElementsByTagName('td');
+                shouldDisplay = false;
+
+                for (j = 0; j < cells.length; j++) {
+                    cell = cells[j];
+                    if (cell && cell.innerHTML.toLowerCase().indexOf(searchTerm) > -1) {
+                        shouldDisplay = true;
+                        break;
+                    }
+                }
+
+                if (shouldDisplay) {
+                    rows[i].style.display = '';
+                }
+            }
+        }
+    </script>
+</body>
+</html>
