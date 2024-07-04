@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-image: url('back.jpeg'); /* Percorso relativo per l'immagine */
+            background-image: url('back.jpeg'); /* Aggiorna il percorso dell'immagine */
             background-size: cover;
             background-repeat: no-repeat;
             background-attachment: fixed;
@@ -24,6 +24,14 @@
             text-align: center;
             margin-bottom: 20px;
         }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box; /* Include il padding e il bordo nella larghezza totale */
+        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -37,30 +45,12 @@
         th {
             cursor: pointer;
         }
-        input[type="text"], input[type="number"] {
-            width: 100%;
-            padding: 5px;
-            margin: 5px 0;
-            box-sizing: border-box;
-        }
-        button {
-            padding: 10px 15px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Le Mie Pizze</h1>
-        <!-- Aggiunta della barra di ricerca -->
-        <div style="margin-bottom: 10px;">
-            <input type="text" id="searchInput" placeholder="Cerca...">
-            <button onclick="handleSearch()">Cerca</button>
-        </div>
+        <input type="text" id="searchInput" placeholder="Cerca la tua pizza o ingrediente...">
         <table id="menuTable">
             <!-- La tabella verrà popolata con i dati dal CSV -->
         </table>
@@ -69,6 +59,11 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             loadTable();
+
+            document.getElementById('searchInput').addEventListener('input', function () {
+                var searchTerm = this.value.toLowerCase();
+                filterTable(searchTerm);
+            });
         });
 
         function loadTable() {
@@ -94,20 +89,15 @@
                 return;
             }
 
-            const searchInput = document.getElementById('searchInput').value.toLowerCase();
-            let filteredData = data.filter(row => {
-                return row.some(cell => cell.toLowerCase().includes(searchInput));
-            });
-
             let tableHtml = '<thead><tr>';
             data[0].forEach(header => {
-                tableHtml += '<th>' + header + '</th>';
+                tableHtml += '<th onclick="sortTable(' + data[0].indexOf(header) + ')">' + header + '</th>';
             });
             tableHtml += '</tr></thead><tbody>';
 
-            for (let i = 1; i < filteredData.length; i++) {
+            for (let i = 1; i < data.length; i++) {
                 tableHtml += '<tr>';
-                filteredData[i].forEach(cell => {
+                data[i].forEach(cell => {
                     tableHtml += '<td>' + cell + '</td>';
                 });
                 tableHtml += '</tr>';
@@ -117,8 +107,56 @@
             document.getElementById('menuTable').innerHTML = tableHtml;
         }
 
-        function handleSearch() {
-            renderTable(parsedData);
+        function filterTable(searchTerm) {
+            const table = document.getElementById('menuTable');
+            const rows = table.getElementsByTagName('tr');
+
+            for (let i = 1; i < rows.length; i++) { // Inizia da 1 per saltare l'intestazione
+                let shouldDisplay = false;
+                const cells = rows[i].getElementsByTagName('td');
+
+                for (let j = 0; j < cells.length; j++) {
+                    const cell = cells[j];
+                    if (cell.innerHTML.toLowerCase().indexOf(searchTerm) > -1) {
+                        shouldDisplay = true;
+                        break;
+                    }
+                }
+
+                if (shouldDisplay) {
+                    rows[i].style.display = '';
+                } else {
+                    rows[i].style.display = 'none';
+                }
+            }
+        }
+
+        function sortTable(columnIndex) {
+            const table = document.getElementById('menuTable');
+            const rows = Array.from(table.rows).slice(1); // Converte HTMLCollection in array e salta l'intestazione
+            let direction = table.rows[0].cells[columnIndex].getAttribute('data-sort') || 'asc'; // Default: ascendente
+            direction = direction === 'asc' ? 'desc' : 'asc'; // Inverte la direzione
+
+            // Rimuove gli attributi data-sort da tutte le celle dell'intestazione
+            Array.from(table.rows[0].cells).forEach(cell => cell.removeAttribute('data-sort'));
+
+            // Imposta l'attributo data-sort sulla cella cliccata
+            table.rows[0].cells[columnIndex].setAttribute('data-sort', direction);
+
+            // Ordina le righe
+            rows.sort((a, b) => {
+                const cellA = a.cells[columnIndex].textContent.trim();
+                const cellB = b.cells[columnIndex].textContent.trim();
+
+                if (direction === 'asc') {
+                    return cellA.localeCompare(cellB);
+                } else {
+                    return cellB.localeCompare(cellA);
+                }
+            });
+
+            // Ricostruisce la tabella ordinata
+            rows.forEach(row => table.appendChild(row));
         }
     </script>
 </body>
