@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pizzeria</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('background.jpeg'); /* Percorso relativo per l'immagine */
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            color: white;
+        }
+        .container {
+            background-color: rgba(0, 0, 0, 0.7); /* Sfondo semitrasparente per il contenuto */
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 800px;
+            margin: 20px auto;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            cursor: pointer;
+        }
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 5px;
+            margin: 5px 0;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Le Mie Pizze</h1>
+        <table id="menuTable">
+            <!-- La tabella verrà popolata con i dati dal Google Sheets -->
+        </table>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            loadTable();
+        });
+
+        function loadTable() {
+            // URL del file CSV condivisibile
+            const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSyV8Ike1uMt1H_VN7tQ3M1I2B7BPTr8TwOp-rpXr2wts-9axvnIrPoE57tJ8TKHaCeF8m6cTbNNdUw/pub?output=csv';
+
+            fetch(csvUrl)
+                .then(response => response.text())
+                .then(data => {
+                    const parsedData = parseCSV(data);
+                    renderTable(parsedData);
+                })
+                .catch(error => console.error('Errore nel caricamento dei dati:', error));
+        }
+
+        function parseCSV(data) {
+            const rows = data.split('\n').map(row => row.split(','));
+            return rows;
+        }
+
+        function renderTable(data) {
+            if (!data || data.length === 0) {
+                console.error('Nessun dato ricevuto');
+                return;
+            }
+
+            let tableHtml = '<thead><tr>';
+            data[0].forEach(header => {
+                tableHtml += '<th>' + header + '</th>';
+            });
+            tableHtml += '</tr></thead><tbody>';
+
+            for (let i = 1; i < data.length; i++) {
+                tableHtml += '<tr>';
+                data[i].forEach(cell => {
+                    tableHtml += '<td>' + cell + '</td>';
+                });
+                tableHtml += '</tr>';
+            }
+            tableHtml += '</tbody>';
+
+            document.getElementById('menuTable').innerHTML = tableHtml;
+        }
+    </script>
+</body>
+</html>
