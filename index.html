@@ -56,6 +56,11 @@
 <body>
     <div class="container">
         <h1>Le Mie Pizze</h1>
+        <!-- Aggiunta della barra di ricerca -->
+        <div style="margin-bottom: 10px;">
+            <input type="text" id="searchInput" placeholder="Cerca...">
+            <button onclick="handleSearch()">Cerca</button>
+        </div>
         <table id="menuTable">
             <!-- La tabella verrà popolata con i dati dal CSV -->
         </table>
@@ -70,14 +75,8 @@
             const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQOu28yT2UHFlx1fHaUQu37LlY1WK0OwvKkd0XLZA8FxJ3f6Yg-I3iU_queMeBFMs1zMyTtDiSrkZLB/pub?gid=0&single=true&output=csv';
 
             fetch(csvUrl)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok ' + response.statusText);
-                    }
-                    return response.text();
-                })
+                .then(response => response.text())
                 .then(data => {
-                    console.log('Data:', data);
                     const parsedData = parseCSV(data);
                     renderTable(parsedData);
                 })
@@ -95,15 +94,20 @@
                 return;
             }
 
+            const searchInput = document.getElementById('searchInput').value.toLowerCase();
+            let filteredData = data.filter(row => {
+                return row.some(cell => cell.toLowerCase().includes(searchInput));
+            });
+
             let tableHtml = '<thead><tr>';
             data[0].forEach(header => {
                 tableHtml += '<th>' + header + '</th>';
             });
             tableHtml += '</tr></thead><tbody>';
 
-            for (let i = 1; i < data.length; i++) {
+            for (let i = 1; i < filteredData.length; i++) {
                 tableHtml += '<tr>';
-                data[i].forEach(cell => {
+                filteredData[i].forEach(cell => {
                     tableHtml += '<td>' + cell + '</td>';
                 });
                 tableHtml += '</tr>';
@@ -111,6 +115,10 @@
             tableHtml += '</tbody>';
 
             document.getElementById('menuTable').innerHTML = tableHtml;
+        }
+
+        function handleSearch() {
+            renderTable(parsedData);
         }
     </script>
 </body>
