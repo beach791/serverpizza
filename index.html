@@ -67,11 +67,17 @@
         });
 
         function loadTable() {
-            const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQOu28yT2UHFlx1fHaUQu37LlY1WK0OwvKkd0XLZA8FxJ3f6Yg-I3iU_queMeBFMs1zMyTtDiSrkZLB/pubhtml?gid=0&single=true';
+            const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQOu28yT2UHFlx1fHaUQu37LlY1WK0OwvKkd0XLZA8FxJ3f6Yg-I3iU_queMeBFMs1zMyTtDiSrkZLB/pub?output=csv';
 
             fetch(csvUrl)
-                .then(response => response.text())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok ' + response.statusText);
+                    }
+                    return response.text();
+                })
                 .then(data => {
+                    console.log('Data:', data);
                     const parsedData = parseCSV(data);
                     renderTable(parsedData);
                 })
