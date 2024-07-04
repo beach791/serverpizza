@@ -24,12 +24,13 @@
             text-align: center;
             margin-bottom: 20px;
         }
-        .search-bar {
-            width: calc(100% - 22px); /* Allineamento con la larghezza della tabella */
+        input[type="text"] {
+            width: 100%;
             padding: 10px;
             margin-bottom: 20px;
             border: 1px solid #ccc;
             border-radius: 5px;
+            box-sizing: border-box; /* Include il padding e il bordo nella larghezza totale */
         }
         table {
             width: 100%;
@@ -49,7 +50,7 @@
 <body>
     <div class="container">
         <h1>Le Mie Pizze</h1>
-        <input type="text" id="searchInput" class="search-bar" placeholder="Cerca la tua pizza o ingrediente...">
+        <input type="text" id="searchInput" placeholder="Cerca la tua pizza o ingrediente...">
         <table id="menuTable">
             <!-- La tabella verrà popolata con i dati dal CSV -->
         </table>
