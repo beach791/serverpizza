@@ -63,22 +63,37 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            console.log('DOM fully loaded and parsed');
             loadTable();
         });
 
         function loadTable() {
             const sheetId = '1F0aLYU5zJAAMQdirPrnTnDizyyE3yTLM0dUEX5qN9-A'; // Sostituisci con il tuo ID del foglio di calcolo
-            const sheetName = 'Lista Pizze 2024 giusto'; // Sostituisci con il nome del tuo foglio
+            const sheetName = 'lista_pizze'; // Sostituisci con il nome del tuo foglio
 
-            const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetName}?key=AIzaSyBXgyqrDZQxK53ZArdrrFQFhReKNZkW-W0';
+            const apiKey = 'AIzaSyBXgyqrDZQxK53ZArdrrFQFhReKNZkW-W0'; // Sostituisci con la tua chiave API
+            const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetName}?key=${apiKey}`;
+
+            console.log('Fetching data from:', url);
 
             fetch(url)
-                .then(response => response.json())
-                .then(data => renderTable(data.values))
+                .then(response => {
+                    console.log('Response received:', response);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Data received:', data);
+                    renderTable(data.values);
+                })
                 .catch(error => console.error('Errore nel caricamento dei dati:', error));
         }
 
         function renderTable(data) {
+            if (!data || data.length === 0) {
+                console.error('No data received');
+                return;
+            }
+
             let tableHtml = '<thead><tr>';
             data[0].forEach(header => {
                 tableHtml += '<th>' + header + '</th>';
