@@ -57,7 +57,7 @@
     <div class="container">
         <h1>Le Mie Pizze</h1>
         <table id="menuTable">
-            <!-- La tabella verrà popolata con i dati dal Google Sheets -->
+            <!-- La tabella verrà popolata con i dati dal CSV -->
         </table>
     </div>
 
@@ -67,8 +67,7 @@
         });
 
         function loadTable() {
-            // URL del file CSV condivisibile
-            const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQOu28yT2UHFlx1fHaUQu37LlY1WK0OwvKkd0XLZA8FxJ3f6Yg-I3iU_queMeBFMs1zMyTtDiSrkZLB/pub?output=csv';
+            const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQOu28yT2UHFlx1fHaUQu37LlY1WK0OwvKkd0XLZA8FxJ3f6Yg-I3iU_queMeBFMs1zMyTtDiSrkZLB/pubhtml?gid=0&single=true';
 
             fetch(csvUrl)
                 .then(response => response.text())
