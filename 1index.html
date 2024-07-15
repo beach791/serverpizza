@@ -49,8 +49,8 @@
 </head>
 <body>
     <div class="container">
-        <h1>Le Mie Pizze</h1>
-        <input type="text" id="searchInput" placeholder="Cerca la tua pizza o ingrediente...">
+        <h1>Gastronomia - I nostri Prodotti</h1>
+        <input type="text" id="searchInput" placeholder="Cerca...">
         <table id="menuTable">
             <!-- La tabella verrà popolata con i dati dal CSV -->
         </table>
@@ -67,55 +67,57 @@
         });
 
         function loadTable() {
-            var xhr = new XMLHttpRequest();
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState === XMLHttpRequest.DONE) {
-                    if (xhr.status === 200) {
-                        var csvData = xhr.responseText;
-                        renderTable(csvData);
-                    } else {
-                        console.error('Si è verificato un errore durante il caricamento della tabella.');
-                    }
-                }
-            };
-            xhr.open('GET', 'Foglio1.csv', true);
-            xhr.send();
+            const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSr1XAP4IvPg3U6pyzcbRKZRIUwRna2K7qQlmixt50nHuPbDdggBZmsqXpdsZz0NxKK2ay7YBRLwV9P/pub?output=csv';
+
+            fetch(csvUrl)
+                .then(response => response.text())
+                .then(data => {
+                    const parsedData = parseCSV(data);
+                    renderTable(parsedData);
+                })
+                .catch(error => console.error('Errore nel caricamento dei dati:', error));
         }
 
-        function renderTable(csvData) {
-            var lines = csvData.split('\n');
-            var headers = lines[0].split(',').map(header => header.trim());
-            var tableHtml = '<thead><tr>';
-            headers.forEach(function(header, index) {
-                tableHtml += '<th onclick="sortTable(' + index + ')">' + header + '</th>';
+        function parseCSV(data) {
+            const rows = data.split('\n').map(row => row.split(','));
+            return rows;
+        }
+
+        function renderTable(data) {
+            if (!data || data.length === 0) {
+                console.error('Nessun dato ricevuto');
+                return;
+            }
+
+            let tableHtml = '<thead><tr>';
+            data[0].forEach(header => {
+                tableHtml += '<th onclick="sortTable(' + data[0].indexOf(header) + ')">' + header + '</th>';
             });
             tableHtml += '</tr></thead><tbody>';
-            for (var i = 1; i < lines.length; i++) {
-                var row = lines[i].split(',');
-                if (row.length !== headers.length) continue; // Salta le righe con colonne incomplete
+
+            for (let i = 1; i < data.length; i++) {
                 tableHtml += '<tr>';
-                row.forEach(function(cell) {
-                    tableHtml += '<td>' + cell.trim() + '</td>';
+                data[i].forEach(cell => {
+                    tableHtml += '<td>' + cell + '</td>';
                 });
                 tableHtml += '</tr>';
             }
             tableHtml += '</tbody>';
+
             document.getElementById('menuTable').innerHTML = tableHtml;
         }
 
         function filterTable(searchTerm) {
-            var table, rows, cells, cell, i, j, shouldDisplay;
-            table = document.getElementById('menuTable');
-            rows = table.getElementsByTagName('tr');
+            const table = document.getElementById('menuTable');
+            const rows = table.getElementsByTagName('tr');
 
-            for (i = 1; i < rows.length; i++) { // Salta l'intestazione
-                rows[i].style.display = 'none'; // Nascondi inizialmente tutte le righe
-                cells = rows[i].getElementsByTagName('td');
-                shouldDisplay = false;
+            for (let i = 1; i < rows.length; i++) { // Inizia da 1 per saltare l'intestazione
+                let shouldDisplay = false;
+                const cells = rows[i].getElementsByTagName('td');
 
-                for (j = 0; j < cells.length; j++) {
-                    cell = cells[j];
-                    if (cell && cell.innerHTML.toLowerCase().indexOf(searchTerm) > -1) {
+                for (let j = 0; j < cells.length; j++) {
+                    const cell = cells[j];
+                    if (cell.innerHTML.toLowerCase().indexOf(searchTerm) > -1) {
                         shouldDisplay = true;
                         break;
                     }
@@ -123,48 +125,38 @@
 
                 if (shouldDisplay) {
                     rows[i].style.display = '';
+                } else {
+                    rows[i].style.display = 'none';
                 }
             }
         }
 
         function sortTable(columnIndex) {
-            var table, rows, switching, i, x, y, shouldSwitch, direction, switchCount = 0;
-            table = document.getElementById('menuTable');
-            switching = true;
-            direction = "asc"; 
+            const table = document.getElementById('menuTable');
+            const rows = Array.from(table.rows).slice(1); // Converte HTMLCollection in array e salta l'intestazione
+            let direction = table.rows[0].cells[columnIndex].getAttribute('data-sort') || 'asc'; // Default: ascendente
+            direction = direction === 'asc' ? 'desc' : 'asc'; // Inverte la direzione
 
-            while (switching) {
-                switching = false;
-                rows = table.rows;
+            // Rimuove gli attributi data-sort da tutte le celle dell'intestazione
+            Array.from(table.rows[0].cells).forEach(cell => cell.removeAttribute('data-sort'));
 
-                for (i = 1; i < (rows.length - 1); i++) {
-                    shouldSwitch = false;
-                    x = rows[i].getElementsByTagName("TD")[columnIndex];
-                    y = rows[i + 1].getElementsByTagName("TD")[columnIndex];
+            // Imposta l'attributo data-sort sulla cella cliccata
+            table.rows[0].cells[columnIndex].setAttribute('data-sort', direction);
 
-                    if (direction == "asc") {
-                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-                            shouldSwitch = true;
-                            break;
-                        }
-                    } else if (direction == "desc") {
-                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
-                            shouldSwitch = true;
-                            break;
-                        }
-                    }
-                }
-                if (shouldSwitch) {
-                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-                    switching = true;
-                    switchCount++; 
+            // Ordina le righe
+            rows.sort((a, b) => {
+                const cellA = a.cells[columnIndex].textContent.trim();
+                const cellB = b.cells[columnIndex].textContent.trim();
+
+                if (direction === 'asc') {
+                    return cellA.localeCompare(cellB);
                 } else {
-                    if (switchCount == 0 && direction == "asc") {
-                        direction = "desc";
-                        switching = true;
-                    }
+                    return cellB.localeCompare(cellA);
                 }
-            }
+            });
+
+            // Ricostruisce la tabella ordinata
+            rows.forEach(row => table.appendChild(row));
         }
     </script>
 </body>
