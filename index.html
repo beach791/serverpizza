@@ -12,6 +12,8 @@
             background-repeat: no-repeat;
             background-attachment: scroll; /* Fa scorrere l'immagine con il contenuto */
             color: white;
+            margin: 0;
+            padding: 0;
         }
         .container {
             background-color: rgba(0, 0, 0, 0.7); /* Sfondo semitrasparente per il contenuto */
@@ -19,10 +21,13 @@
             border-radius: 10px;
             max-width: 800px;
             margin: 20px auto;
+            box-sizing: border-box;
+            width: 90%; /* Assicura che la larghezza si adatti allo schermo */
         }
         h1 {
             text-align: center;
             margin-bottom: 20px;
+            font-size: 24px; /* Dimensione del font per i titoli */
         }
         input[type="text"] {
             width: 100%;
@@ -50,6 +55,8 @@
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
+            table-layout: fixed; /* Consente alla tabella di adattarsi alla larghezza disponibile */
+            word-wrap: break-word; /* Permette la rottura delle parole troppo lunghe */
         }
         th, td {
             border: 1px solid #dddddd;
@@ -59,11 +66,26 @@
         th {
             cursor: pointer;
         }
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 20px;
+            }
+            input[type="text"] {
+                padding: 8px;
+            }
+            button {
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+            th, td {
+                padding: 6px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Pizzeria da Roby - Le Mie Pizze</h1>
+        <h1>Pizzeria da Roby - Le Mie Pizze -</h1>
         <input type="text" id="searchInput" placeholder="Cerca la tua pizza o ingrediente...">
         <button id="goToGastronomia">Gastronomia</button>
         <table id="menuTable">
