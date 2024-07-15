@@ -8,9 +8,9 @@
         body {
             font-family: Arial, sans-serif;
             background-image: url('back.jpeg'); /* Aggiorna il percorso dell'immagine */
-            background-size: cover;
+            background-size: 100% 100%; /* Adatta l'immagine alla finestra del browser */
             background-repeat: no-repeat;
-            background-attachment: fixed;
+            background-attachment: scroll; /* Fa scorrere l'immagine con il contenuto */
             color: white;
         }
         .container {
@@ -32,6 +32,20 @@
             border-radius: 5px;
             box-sizing: border-box; /* Include il padding e il bordo nella larghezza totale */
         }
+        button {
+            display: block;
+            margin: 0 auto 20px auto; /* Centra il pulsante */
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #ff6600;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #ff8533;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -51,6 +65,7 @@
     <div class="container">
         <h1>Pizzeria da Roby - Le Mie Pizze - </h1>
         <input type="text" id="searchInput" placeholder="Cerca la tua pizza o ingrediente...">
+        <button id="goToGastronomia">Gastronomia</button>
         <table id="menuTable">
             <!-- La tabella verrà popolata con i dati dal CSV -->
         </table>
@@ -63,6 +78,10 @@
             document.getElementById('searchInput').addEventListener('input', function () {
                 var searchTerm = this.value.toLowerCase();
                 filterTable(searchTerm);
+            });
+
+            document.getElementById('goToGastronomia').addEventListener('click', function () {
+                window.location.href = 'page_gas.html';
             });
         });
 
