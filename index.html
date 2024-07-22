@@ -101,19 +101,20 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Pizzeria da Roby - Le Mie Pizze</h1>
-        <input type="text" id="searchInput" placeholder="Cerca la tua pizza o ingrediente...">
-        <button id="goToGastronomia">Vai a Gastronomia</button>
-        <table id="menuTable">
-            <!-- La tabella verrà popolata con i dati dal CSV -->
-        </table>
-    </div>
+   <div class="container">
+    <h1>Pizzeria da Roby - Le Mie Pizze</h1>
+    <input type="text" id="searchInput" placeholder="Cerca la tua pizza o ingrediente...">
+    <button id="goToGastronomia">Vai a Gastronomia</button>
+    <table id="menuTable">
+        <!-- La tabella verrà popolata con i dati dal CSV -->
+    </table>
+</div>
 
-    <div id="imageContainer">
-        <button onclick="closeImage()">Chiudi</button>
-        <img id="pizzaImage" src="" alt="Immagine della pizza"/>
-    </div>
+<div id="imageContainer">
+    <button onclick="closeImage()">Chiudi</button>
+    <img id="pizzaImage" src="" alt="Immagine della pizza"/>
+</div>
+
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
