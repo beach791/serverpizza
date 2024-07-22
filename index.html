@@ -66,6 +66,23 @@
         th {
             cursor: pointer;
         }
+        #imageContainer {
+            display: none; /* Nasconde inizialmente il contenitore dell'immagine */
+            position: fixed; /* Posizione fissa per sovrapporre il contenuto */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8); /* Sfondo scuro per l'immagine */
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        #imageContainer img {
+            max-width: 100%;
+            max-height: 80vh;
+            margin-top: 20px;
+        }
         @media (max-width: 600px) {
             h1 {
                 font-size: 20px;
@@ -91,6 +108,11 @@
         <table id="menuTable">
             <!-- La tabella verrà popolata con i dati dal CSV -->
         </table>
+    </div>
+
+    <div id="imageContainer">
+        <button onclick="closeImage()">Chiudi</button>
+        <img id="pizzaImage" src="" alt="Immagine della pizza"/>
     </div>
 
     <script>
@@ -124,92 +146,36 @@
             return rows;
         }
 
-     function renderTable(data) {
-    if (!data || data.length === 0) {
-        console.error('Nessun dato ricevuto');
-        return;
-    }
-
-    let tableHtml = '<thead><tr>';
-    data[0].forEach((header, index) => {
-        tableHtml += `<th onclick="sortTable(${index})">${header}</th>`;
-    });
-    tableHtml += '</tr></thead><tbody>';
-
-    for (let i = 1; i < data.length; i++) {
-        tableHtml += '<tr>';
-        data[i].forEach((cell, index) => {
-            if (index === 0) { // Assumendo che il nome della pizza sia nella prima colonna
-                tableHtml += `<td><a href="#" onclick="openImage('${cell.trim()}'); return false;">${cell}</a></td>`;
-            } else {
-                tableHtml += `<td>${cell}</td>`;
+        function renderTable(data) {
+            if (!data || data.length === 0) {
+                console.error('Nessun dato ricevuto');
+                return;
             }
-        });
-        tableHtml += '</tr>';
-    }
-    tableHtml += '</tbody>';
 
-    document.getElementById('menuTable').innerHTML = tableHtml;
-}
+            let tableHtml = '<thead><tr>';
+            data[0].forEach((header, index) => {
+                tableHtml += `<th onclick="sortTable(${index})">${header}</th>`;
+            });
+            tableHtml += '</tr></thead><tbody>';
 
+            for (let i = 1; i < data.length; i++) {
+                tableHtml += '<tr>';
+                data[i].forEach((cell, index) => {
+                    if (index === 0) { // Assumendo che il nome della pizza sia nella prima colonna
+                        tableHtml += `<td><a href="#" onclick="openImage('${cell.trim()}'); return false;">${cell}</a></td>`;
+                    } else {
+                        tableHtml += `<td>${cell}</td>`;
+                    }
+                });
+                tableHtml += '</tr>';
+            }
+            tableHtml += '</tbody>';
+
+            document.getElementById('menuTable').innerHTML = tableHtml;
+        }
 
         function filterTable(searchTerm) {
             const table = document.getElementById('menuTable');
             const rows = table.getElementsByTagName('tr');
 
-            for (let i = 1; i < rows.length; i++) { // Inizia da 1 per saltare l'intestazione
-                let shouldDisplay = false;
-                const cells = rows[i].getElementsByTagName('td');
-
-                for (let j = 0; j < cells.length; j++) {
-                    const cell = cells[j];
-                    if (cell.innerHTML.toLowerCase().indexOf(searchTerm) > -1) {
-                        shouldDisplay = true;
-                        break;
-                    }
-                }
-
-                if (shouldDisplay) {
-                    rows[i].style.display = '';
-                } else {
-                    rows[i].style.display = 'none';
-                }
-            }
-        }
-
-        function sortTable(columnIndex) {
-            const table = document.getElementById('menuTable');
-            const rows = Array.from(table.querySelectorAll('tbody tr')); // Converte NodeList in array
-            let direction = table.querySelectorAll('th')[columnIndex].getAttribute('data-sort') || 'asc'; // Default: ascendente
-            direction = direction === 'asc' ? 'desc' : 'asc'; // Inverte la direzione
-
-            // Rimuove gli attributi data-sort da tutte le celle dell'intestazione
-            table.querySelectorAll('th').forEach(th => th.removeAttribute('data-sort'));
-
-            // Imposta l'attributo data-sort sulla cella cliccata
-            table.querySelectorAll('th')[columnIndex].setAttribute('data-sort', direction);
-
-            // Ordina le righe
-            rows.sort((a, b) => {
-                const cellA = a.cells[columnIndex].textContent.trim();
-                const cellB = b.cells[columnIndex].textContent.trim();
-
-                if (direction === 'asc') {
-                    return cellA.localeCompare(cellB);
-                } else {
-                    return cellB.localeCompare(cellA);
-                }
-            });
-
-            // Ricostruisce la tabella ordinata
-            const tbody = table.querySelector('tbody');
-            rows.forEach(row => tbody.appendChild(row));
-        }
-
-        function openImage(pizzaName) {
-            const imageUrl = 'https://beach791.github.io/serverpizza/' + pizzaName + '.jpg'; // Costruisce l'URL completo
-            window.open(imageUrl, '_blank'); // Apre l'immagine in una nuova scheda
-        }
-    </script>
-</body>
-</html>
+            for (let i =
