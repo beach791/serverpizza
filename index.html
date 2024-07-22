@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pizzeria</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('back.jpeg'); /* Aggiorna il percorso dell'immagine */
+            background-size: 100% 100%; /* Adatta l'immagine alla finestra del browser */
+            background-repeat: no-repeat;
+            background-attachment: scroll; /* Fa scorrere l'immagine con il contenuto */
+            color: white;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            background-color: rgba(0, 0, 0, 0.7); /* Sfondo semitrasparente per il contenuto */
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 800px;
+            margin: 20px auto;
+            box-sizing: border-box;
+            width: 90%; /* Assicura che la larghezza si adatti allo schermo */
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px; /* Dimensione del font per i titoli */
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box; /* Include il padding e il bordo nella larghezza totale */
+        }
+        button {
+            display: block;
+            margin: 0 auto 20px auto; /* Centra il pulsante */
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #ff6600;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #ff8533;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            table-layout: fixed; /* Consente alla tabella di adattarsi alla larghezza disponibile */
+            word-wrap: break-word; /* Permette la rottura delle parole troppo lunghe */
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            cursor: pointer;
+        }
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 20px;
+            }
+            input[type="text"] {
+                padding: 8px;
+            }
+            button {
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+            th, td {
+                padding: 6px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Pizzeria da Roby - Le Mie Pizze</h1>
+        <input type="text" id="searchInput" placeholder="Cerca la tua pizza o ingrediente...">
+        <button id="goToGastronomia">Vai a Gastronomia</button>
+        <table id="menuTable">
+            <!-- La tabella verrà popolata con i dati dal CSV -->
+        </table>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            loadTable();
+
+            document.getElementById('searchInput').addEventListener('input', function () {
+                var searchTerm = this.value.toLowerCase();
+                filterTable(searchTerm);
+            });
+
+            document.getElementById('goToGastronomia').addEventListener('click', function () {
+                window.location.href = 'page_gas.html';
+            });
+        });
+
+        function loadTable() {
+            const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQOu28yT2UHFlx1fHaUQu37LlY1WK0OwvKkd0XLZA8FxJ3f6Yg-I3iU_queMeBFMs1zMyTtDiSrkZLB/pub?gid=0&single=true&output=csv';
+
+            fetch(csvUrl)
+                .then(response => response.text())
+                .then(data => {
+                    const parsedData = parseCSV(data);
+                    renderTable(parsedData);
+                })
+                .catch(error => console.error('Errore nel caricamento dei dati:', error));
+        }
+
+        function parseCSV(data) {
+            const rows = data.split('\n').map(row => row.split(','));
+            return rows;
+        }
+
+        function renderTable(data) {
+            if (!data || data.length === 0) {
+                console.error('Nessun dato ricevuto');
+                return;
+            }
+
+            let tableHtml = '<thead><tr>';
+            data[0].forEach(header => {
+                tableHtml += '<th onclick="sortTable(' + data[0].indexOf(header) + ')">' + header + '</th>';
+            });
+            tableHtml += '</tr></thead><tbody>';
+
+            for (let i = 1; i < data.length; i++) {
+                tableHtml += '<tr>';
+                data[i].forEach((cell, index) => {
+                    if (index === 0) { // Assumendo che il nome della pizza sia nella prima colonna
+                        tableHtml += `<td><a href="#" onclick="openImage('${cell.trim()}')">${cell}</a></td>`;
+                    } else {
+                        tableHtml += '<td>' + cell + '</td>';
+                    }
+                });
+                tableHtml += '</tr>';
+            }
+            tableHtml += '</tbody>';
+
+            document.getElementById('menuTable').innerHTML = tableHtml;
+        }
+
+        function filterTable(searchTerm) {
+            const table = document.getElementById('menuTable');
+            const rows = table.getElementsByTagName('tr');
+
+            for (let i = 1; i < rows.length; i++) { // Inizia da 1 per saltare l'intestazione
+                let shouldDisplay = false;
+                const cells = rows[i].getElementsByTagName('td');
+
+                for (let j = 0; j < cells.length; j++) {
+                    const cell = cells[j];
+                    if (cell.innerHTML.toLowerCase().indexOf(searchTerm) > -1) {
+                        shouldDisplay = true;
+                        break;
+                    }
+                }
+
+                if (shouldDisplay) {
+                    rows[i].style.display = '';
+                } else {
+                    rows[i].style.display = 'none';
+                }
+            }
+        }
+
+        function sortTable(columnIndex) {
+            const table = document.getElementById('menuTable');
+            const rows = Array.from(table.rows).slice(1); // Converte HTMLCollection in array e salta l'intestazione
+            let direction = table.rows[0].cells[columnIndex].getAttribute('data-sort') || 'asc'; // Default: ascendente
+            direction = direction === 'asc' ? 'desc' : 'asc'; // Inverte la direzione
+
+            // Rimuove gli attributi data-sort da tutte le celle dell'intestazione
+            Array.from(table.rows[0].cells).forEach(cell => cell.removeAttribute('data-sort'));
+
+            // Imposta l'attributo data-sort sulla cella cliccata
+            table.rows[0].cells[columnIndex].setAttribute('data-sort', direction);
+
+            // Ordina le righe
+            rows.sort((a, b) => {
+                const cellA = a.cells[columnIndex].textContent.trim();
+                const cellB = b.cells[columnIndex].textContent.trim();
+
+                if (direction === 'asc') {
+                    return cellA.localeCompare(cellB);
+                } else {
+                    return cellB.localeCompare(cellA);
+                }
+            });
+
+            // Ricostruisce la tabella ordinata
+            rows.forEach(row => table.appendChild(row));
+        }
+
+        function openImage(pizzaName) {
+            const imageUrl = pizzaName + '.jpg'; // Modifica questo se usi un'altra estensione
+            window.open(imageUrl, '_blank');
+        }
+    </script>
+</body>
+</html>
