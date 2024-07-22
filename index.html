@@ -124,33 +124,34 @@
             return rows;
         }
 
-        function renderTable(data) {
-            if (!data || data.length === 0) {
-                console.error('Nessun dato ricevuto');
-                return;
+     function renderTable(data) {
+    if (!data || data.length === 0) {
+        console.error('Nessun dato ricevuto');
+        return;
+    }
+
+    let tableHtml = '<thead><tr>';
+    data[0].forEach((header, index) => {
+        tableHtml += `<th onclick="sortTable(${index})">${header}</th>`;
+    });
+    tableHtml += '</tr></thead><tbody>';
+
+    for (let i = 1; i < data.length; i++) {
+        tableHtml += '<tr>';
+        data[i].forEach((cell, index) => {
+            if (index === 0) { // Assumendo che il nome della pizza sia nella prima colonna
+                tableHtml += `<td><a href="#" onclick="openImage('${cell.trim()}'); return false;">${cell}</a></td>`;
+            } else {
+                tableHtml += `<td>${cell}</td>`;
             }
+        });
+        tableHtml += '</tr>';
+    }
+    tableHtml += '</tbody>';
 
-            let tableHtml = '<thead><tr>';
-            data[0].forEach(header => {
-                tableHtml += '<th onclick="sortTable(' + data[0].indexOf(header) + ')">' + header + '</th>';
-            });
-            tableHtml += '</tr></thead><tbody>';
+    document.getElementById('menuTable').innerHTML = tableHtml;
+}
 
-            for (let i = 1; i < data.length; i++) {
-                tableHtml += '<tr>';
-                data[i].forEach((cell, index) => {
-                    if (index === 0) { // Assumendo che il nome della pizza sia nella prima colonna
-                        tableHtml += `<td><a href="#" onclick="openImage('${cell.trim()}'); return false;">${cell}</a></td>`;
-                    } else {
-                        tableHtml += '<td>' + cell + '</td>';
-                    }
-                });
-                tableHtml += '</tr>';
-            }
-            tableHtml += '</tbody>';
-
-            document.getElementById('menuTable').innerHTML = tableHtml;
-        }
 
         function filterTable(searchTerm) {
             const table = document.getElementById('menuTable');
