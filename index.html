@@ -62,6 +62,7 @@
             border: 1px solid #dddddd;
             text-align: left;
             padding: 8px;
+            color: white; /* Imposta il colore del testo delle celle a bianco */
         }
         th {
             cursor: pointer;
@@ -82,23 +83,39 @@
             }
         }
 
-        /* Stili per il contenitore dell'immagine */
         #imageContainer {
-            display: none; /* Nasconde inizialmente il contenitore dell'immagine */
-            position: fixed; /* Posizione fissa per sovrapporre il contenuto */
+            display: none; /* Inizialmente nascosto */
+            position: fixed; /* Posizionato sopra il contenuto della pagina */
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8); /* Sfondo scuro per l'immagine */
-            color: white;
-            text-align: center;
-            padding: 20px;
+            background: rgba(0, 0, 0, 0.8); /* Sfondo scuro con trasparenza */
+            z-index: 1000; /* Assicurati che il contenitore dell'immagine sia sopra altri contenuti */
+            justify-content: center;
+            align-items: center;
         }
+
         #imageContainer img {
-            max-width: 100%;
-            max-height: 80vh;
-            margin-top: 20px;
+            max-width: 90%;
+            max-height: 80%;
+        }
+
+        #imageContainer button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #ff6600;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        #imageContainer button:hover {
+            background-color: #ff8533;
         }
     </style>
 </head>
@@ -112,10 +129,9 @@
         </table>
     </div>
 
-    <!-- Contenitore per l'immagine -->
     <div id="imageContainer">
         <button onclick="closeImage()">Chiudi</button>
-        <img id="pizzaImage" src="" alt="Immagine della pizza"/>
+        <img id="pizzaImage" src="" alt="Immagine Pizza">
     </div>
 
     <script>
@@ -203,44 +219,34 @@
 
         function sortTable(columnIndex) {
             const table = document.getElementById('menuTable');
-            const rows = Array.from(table.rows).slice(1); // Converte HTMLCollection in array e salta l'intestazione
-            let direction = table.rows[0].cells[columnIndex].getAttribute('data-sort') || 'asc'; // Default: ascendente
-            direction = direction === 'asc' ? 'desc' : 'asc'; // Inverte la direzione
+            const rows = Array.from(table.getElementsByTagName('tr')).slice(1); // Esclude l'intestazione
+            const isAscending = table.getAttribute('data-sort-order') === 'asc';
+            
+            rows.sort((rowA, rowB) => {
+                const cellA = rowA.getElementsByTagName('td')[columnIndex].innerText.toLowerCase();
+                const cellB = rowB.getElementsByTagName('td')[columnIndex].innerText.toLowerCase();
 
-            // Rimuove gli attributi data-sort da tutte le celle dell'intestazione
-            Array.from(table.rows[0].cells).forEach(cell => cell.removeAttribute('data-sort'));
-
-            // Imposta l'attributo data-sort sulla cella cliccata
-            table.rows[0].cells[columnIndex].setAttribute('data-sort', direction);
-
-            // Ordina le righe
-            rows.sort((a, b) => {
-                const cellA = a.cells[columnIndex].textContent.trim();
-                const cellB = b.cells[columnIndex].textContent.trim();
-
-                if (direction === 'asc') {
-                    return cellA.localeCompare(cellB);
-                } else {
-                    return cellB.localeCompare(cellA);
-                }
+                if (cellA < cellB) return isAscending ? -1 : 1;
+                if (cellA > cellB) return isAscending ? 1 : -1;
+                return 0;
             });
 
-            // Ricostruisce la tabella ordinata
             rows.forEach(row => table.appendChild(row));
+
+            table.setAttribute('data-sort-order', isAscending ? 'desc' : 'asc');
         }
 
-        function openImage(pizzaName) {
-            const imageUrl = 'https://beach791.github.io/serverpizza/' + pizzaName + '.jpg'; // Costruisce l'URL completo
-            const imgElement = document.getElementById('pizzaImage');
-            const container = document.getElementById('imageContainer');
+        function openImage(imageName) {
+            const imageContainer = document.getElementById('imageContainer');
+            const pizzaImage = document.getElementById('pizzaImage');
 
-            imgElement.src = imageUrl; // Imposta l'URL dell'immagine
-            container.style.display = 'block'; // Mostra il contenitore dell'immagine
+            pizzaImage.src = 'images/' + imageName + '.jpeg'; // Aggiorna il percorso dell'immagine
+            imageContainer.style.display = 'flex';
         }
 
         function closeImage() {
-            const container = document.getElementById('imageContainer');
-            container.style.display = 'none'; // Nasconde il contenitore dell'immagine
+            const imageContainer = document.getElementById('imageContainer');
+            imageContainer.style.display = 'none';
         }
     </script>
 </body>
