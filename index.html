@@ -217,11 +217,7 @@
                     }
                 }
 
-                if (shouldDisplay) {
-                    rows[i].style.display = '';
-                } else {
-                    rows[i].style.display = 'none';
-                }
+                rows[i].style.display = shouldDisplay ? '' : 'none';
             }
         }
 
@@ -232,8 +228,8 @@
             direction = direction === 'asc' ? 'desc' : 'asc'; // Inverte la direzione
 
             rows.sort((a, b) => {
-                const cellA = a.cells[columnIndex].innerText.toLowerCase();
-                const cellB = b.cells[columnIndex].innerText.toLowerCase();
+                const cellA = a.cells[columnIndex].innerText.trim().toLowerCase();
+                const cellB = b.cells[columnIndex].innerText.trim().toLowerCase();
 
                 if (cellA < cellB) return direction === 'asc' ? -1 : 1;
                 if (cellA > cellB) return direction === 'asc' ? 1 : -1;
