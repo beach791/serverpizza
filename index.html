@@ -140,7 +140,7 @@
                 tableHtml += '<tr>';
                 data[i].forEach((cell, index) => {
                     if (index === 0) { // Assumendo che il nome della pizza sia nella prima colonna
-                        tableHtml += `<td><a href="#" onclick="openImage('${cell.trim()}')">${cell}</a></td>`;
+                        tableHtml += `<td><a href="#" onclick="openImage('${cell.trim()}'); return false;">${cell}</a></td>`;
                     } else {
                         tableHtml += '<td>' + cell + '</td>';
                     }
@@ -178,15 +178,15 @@
 
         function sortTable(columnIndex) {
             const table = document.getElementById('menuTable');
-            const rows = Array.from(table.rows).slice(1); // Converte HTMLCollection in array e salta l'intestazione
-            let direction = table.rows[0].cells[columnIndex].getAttribute('data-sort') || 'asc'; // Default: ascendente
+            const rows = Array.from(table.querySelectorAll('tbody tr')); // Converte NodeList in array
+            let direction = table.querySelectorAll('th')[columnIndex].getAttribute('data-sort') || 'asc'; // Default: ascendente
             direction = direction === 'asc' ? 'desc' : 'asc'; // Inverte la direzione
 
             // Rimuove gli attributi data-sort da tutte le celle dell'intestazione
-            Array.from(table.rows[0].cells).forEach(cell => cell.removeAttribute('data-sort'));
+            table.querySelectorAll('th').forEach(th => th.removeAttribute('data-sort'));
 
             // Imposta l'attributo data-sort sulla cella cliccata
-            table.rows[0].cells[columnIndex].setAttribute('data-sort', direction);
+            table.querySelectorAll('th')[columnIndex].setAttribute('data-sort', direction);
 
             // Ordina le righe
             rows.sort((a, b) => {
@@ -201,38 +201,14 @@
             });
 
             // Ricostruisce la tabella ordinata
-            rows.forEach(row => table.appendChild(row));
+            const tbody = table.querySelector('tbody');
+            rows.forEach(row => tbody.appendChild(row));
         }
 
-        function renderTable(data) {
-    if (!data || data.length === 0) {
-        console.error('Nessun dato ricevuto');
-        return;
-    }
-
-    let tableHtml = '<thead><tr>';
-    data[0].forEach(header => {
-        tableHtml += '<th onclick="sortTable(' + data[0].indexOf(header) + ')">' + header + '</th>';
-    });
-    tableHtml += '</tr></thead><tbody>';
-
-    for (let i = 1; i < data.length; i++) {
-        tableHtml += '<tr>';
-        data[i].forEach((cell, index) => {
-            if (index === 0) { // Assumendo che il nome della pizza sia nella prima colonna
-                tableHtml += `<td><a href="#" onclick="openImage('${cell.trim()}'); return false;">${cell}</a></td>`;
-            } else {
-                tableHtml += '<td>' + cell + '</td>';
-            }
-        });
-        tableHtml += '</tr>';
-    }
-    tableHtml += '</tbody>';
-
-    document.getElementById('menuTable').innerHTML = tableHtml;
-}
-
-    
+        function openImage(pizzaName) {
+            const imageUrl = 'https://beach791.github.io/serverpizza/' + pizzaName + '.jpg'; // Costruisce l'URL completo
+            window.open(imageUrl, '_blank'); // Apre l'immagine in una nuova scheda
+        }
     </script>
 </body>
 </html>
