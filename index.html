@@ -66,6 +66,23 @@
         th {
             cursor: pointer;
         }
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 20px;
+            }
+            input[type="text"] {
+                padding: 8px;
+            }
+            button {
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+            th, td {
+                padding: 6px;
+            }
+        }
+
+        /* Stili per il contenitore dell'immagine */
         #imageContainer {
             display: none; /* Nasconde inizialmente il contenitore dell'immagine */
             position: fixed; /* Posizione fissa per sovrapporre il contenuto */
@@ -83,38 +100,23 @@
             max-height: 80vh;
             margin-top: 20px;
         }
-        @media (max-width: 600px) {
-            h1 {
-                font-size: 20px;
-            }
-            input[type="text"] {
-                padding: 8px;
-            }
-            button {
-                padding: 8px 16px;
-                font-size: 14px;
-            }
-            th, td {
-                padding: 6px;
-            }
-        }
     </style>
 </head>
 <body>
-   <div class="container">
-    <h1>Pizzeria da Roby - Le Mie Pizze</h1>
-    <input type="text" id="searchInput" placeholder="Cerca la tua pizza o ingrediente...">
-    <button id="goToGastronomia">Vai a Gastronomia</button>
-    <table id="menuTable">
-        <!-- La tabella verrà popolata con i dati dal CSV -->
-    </table>
-</div>
+    <div class="container">
+        <h1>Pizzeria da Roby - Le Mie Pizze</h1>
+        <input type="text" id="searchInput" placeholder="Cerca la tua pizza o ingrediente...">
+        <button id="goToGastronomia">Vai a Gastronomia</button>
+        <table id="menuTable">
+            <!-- La tabella verrà popolata con i dati dal CSV -->
+        </table>
+    </div>
 
-<div id="imageContainer">
-    <button onclick="closeImage()">Chiudi</button>
-    <img id="pizzaImage" src="" alt="Immagine della pizza"/>
-</div>
-
+    <!-- Contenitore per l'immagine -->
+    <div id="imageContainer">
+        <button onclick="closeImage()">Chiudi</button>
+        <img id="pizzaImage" src="" alt="Immagine della pizza"/>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -154,8 +156,8 @@
             }
 
             let tableHtml = '<thead><tr>';
-            data[0].forEach((header, index) => {
-                tableHtml += `<th onclick="sortTable(${index})">${header}</th>`;
+            data[0].forEach(header => {
+                tableHtml += '<th onclick="sortTable(' + data[0].indexOf(header) + ')">' + header + '</th>';
             });
             tableHtml += '</tr></thead><tbody>';
 
@@ -165,7 +167,7 @@
                     if (index === 0) { // Assumendo che il nome della pizza sia nella prima colonna
                         tableHtml += `<td><a href="#" onclick="openImage('${cell.trim()}'); return false;">${cell}</a></td>`;
                     } else {
-                        tableHtml += `<td>${cell}</td>`;
+                        tableHtml += '<td>' + cell + '</td>';
                     }
                 });
                 tableHtml += '</tr>';
@@ -179,4 +181,67 @@
             const table = document.getElementById('menuTable');
             const rows = table.getElementsByTagName('tr');
 
-            for (let i =
+            for (let i = 1; i < rows.length; i++) { // Inizia da 1 per saltare l'intestazione
+                let shouldDisplay = false;
+                const cells = rows[i].getElementsByTagName('td');
+
+                for (let j = 0; j < cells.length; j++) {
+                    const cell = cells[j];
+                    if (cell.innerHTML.toLowerCase().indexOf(searchTerm) > -1) {
+                        shouldDisplay = true;
+                        break;
+                    }
+                }
+
+                if (shouldDisplay) {
+                    rows[i].style.display = '';
+                } else {
+                    rows[i].style.display = 'none';
+                }
+            }
+        }
+
+        function sortTable(columnIndex) {
+            const table = document.getElementById('menuTable');
+            const rows = Array.from(table.rows).slice(1); // Converte HTMLCollection in array e salta l'intestazione
+            let direction = table.rows[0].cells[columnIndex].getAttribute('data-sort') || 'asc'; // Default: ascendente
+            direction = direction === 'asc' ? 'desc' : 'asc'; // Inverte la direzione
+
+            // Rimuove gli attributi data-sort da tutte le celle dell'intestazione
+            Array.from(table.rows[0].cells).forEach(cell => cell.removeAttribute('data-sort'));
+
+            // Imposta l'attributo data-sort sulla cella cliccata
+            table.rows[0].cells[columnIndex].setAttribute('data-sort', direction);
+
+            // Ordina le righe
+            rows.sort((a, b) => {
+                const cellA = a.cells[columnIndex].textContent.trim();
+                const cellB = b.cells[columnIndex].textContent.trim();
+
+                if (direction === 'asc') {
+                    return cellA.localeCompare(cellB);
+                } else {
+                    return cellB.localeCompare(cellA);
+                }
+            });
+
+            // Ricostruisce la tabella ordinata
+            rows.forEach(row => table.appendChild(row));
+        }
+
+        function openImage(pizzaName) {
+            const imageUrl = 'https://beach791.github.io/serverpizza/' + pizzaName + '.jpg'; // Costruisce l'URL completo
+            const imgElement = document.getElementById('pizzaImage');
+            const container = document.getElementById('imageContainer');
+
+            imgElement.src = imageUrl; // Imposta l'URL dell'immagine
+            container.style.display = 'block'; // Mostra il contenitore dell'immagine
+        }
+
+        function closeImage() {
+            const container = document.getElementById('imageContainer');
+            container.style.display = 'none'; // Nasconde il contenitore dell'immagine
+        }
+    </script>
+</body>
+</html>
